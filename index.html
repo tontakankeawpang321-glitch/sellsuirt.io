@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>StyleCycle | ตลาดซื้อขายเสื้อผ้าแฟชั่นมือหนึ่ง-มือสอง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    :root {
+        /* ธีม: Fashion Modern (Pink/Rose/Clean White) */
+        --primary: #be185d; /* Pink 700 */
+        --primary-light: #db2777; /* Pink 600 */
+        --accent: #fbcfe8; /* Pink 200 */
+        --bg-body: #fdf2f8; /* Pink 50 (Very light) */
+        --bg-card: #ffffff;
+        --text-main: #333333;
+        --text-muted: #888888;
+        --border-color: #fce7f3;
+    }
+
+    body { 
+        font-family: 'Prompt', sans-serif; 
+        background-color: var(--bg-body); 
+        color: var(--text-main); 
+        -webkit-tap-highlight-color: transparent; 
+        overflow-x: hidden;
+        letter-spacing: 0.01em;
+    }
+
+    body.no-scroll { overflow: hidden; }
+    
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #f9a8d4; border-radius: 4px; }
+    
+    dialog {
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+        border: none;
+        outline: none;
+        background-color: var(--bg-card);
+        color: var(--text-main);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border-radius: 1rem;
+        max-height: 90vh;
+        max-width: 95vw;
+        overscroll-behavior: contain;
+    }
+    dialog[open] { opacity: 1; transform: scale(1) translateY(0); }
+    dialog::backdrop { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); }
+    
+    .nav-solid { 
+        background: rgba(255, 255, 255, 0.95); 
+        border-bottom: 1px solid #fce7f3;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    }
+
+    input, select, textarea {
+        background-color: #fffbfc !important;
+        color: var(--text-main) !important;
+        border: 1px solid #fbcfe8 !important; /* Pink border */
+        border-radius: 0.75rem !important; /* More rounded */
+        box-shadow: none !important; 
+        -webkit-appearance: none;
+        transition: all 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--primary) !important;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.1) !important;
+    }
+
+    .field-error { border-color: #ef4444 !important; background-color: #fff1f2 !important; }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    
+    .job-card {
+        background: #ffffff;
+        border: 1px solid white;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05); 
+        position: relative;
+        overflow: hidden;
+        content-visibility: auto; 
+        contain-intrinsic-size: 150px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .job-card:active { transform: scale(0.98); }
+    
+    .btn-primary {
+        background: var(--primary);
+        color: #fff;
+        border: 1px solid var(--primary);
+        border-radius: 0.75rem;
+    }
+    .btn-primary:active {
+        background: var(--primary-light);
+        transform: translateY(1px);
+    }
+
+    .text-gradient {
+        background: linear-gradient(to right, #be185d, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .slider-hidden { display: none; }
+    .slider-visible { display: flex; animation: fadeIn 0.2s; }
+    
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .mobile-touch-target { min-height: 44px; min-width: 44px; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- Navigation -->
+<nav class="nav-solid sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+      <!-- Left Side: Logo + Sell Button (Moved here) -->
+      <div class="flex items-center gap-4">
+          <!-- Logo -->
+          <div class="flex items-center gap-2 cursor-pointer select-none" onclick="refreshApp()">
+            <div class="bg-gradient-to-br from-pink-500 to-rose-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md">
+                <i class="fa-solid fa-shirt text-lg"></i>
+            </div>
+            <div class="hidden sm:block">
+                <span class="font-bold text-xl text-slate-800 tracking-tight block leading-none font-serif">Style<span class="text-pink-600">Cycle</span></span>
+                <span class="text-[9px] text-slate-400 font-medium uppercase tracking-widest">Fashion Market</span>
+            </div>
+          </div>
+
+          <!-- Register/Sell Button (Relocated next to Logo) -->
+          <button onclick="openNewPostModal()" class="bg-slate-900 text-white px-4 py-2 rounded-full font-bold text-xs sm:text-sm shadow-lg shadow-pink-200 active:scale-95 transition-all flex items-center gap-2">
+            <i class="fa-solid fa-camera text-xs"></i> 
+            <span>ลงประกาศขายเสื้อผ้า</span>
+          </button>
+      </div>
+      
+      <!-- Right Side: Filters (Without Province) -->
+      <div class="flex items-center gap-2 md:gap-3">
+         <!-- Desktop Filters -->
+         <div class="hidden lg:flex bg-pink-50/50 p-1 rounded-full border border-pink-100">
+             <select id="filter_category_desktop" class="bg-transparent px-3 py-1.5 text-sm outline-none cursor-pointer border-r border-pink-200 text-slate-600 font-medium hover:text-pink-700 transition-colors !border-none !shadow-none">
+                 <option value="all">👗 หมวดหมู่ (All)</option>
+             </select>
+             <div class="w-[1px] h-6 bg-pink-200 my-auto mx-1"></div>
+             <div class="relative">
+                 <input id="q_desktop" type="text" placeholder="ค้นหา เดรส, เสื้อยืด..." class="bg-transparent pl-8 pr-4 py-1.5 text-sm w-48 outline-none text-slate-800 border-none focus:ring-0 placeholder-slate-400 font-medium !border-none !shadow-none !bg-transparent">
+                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-2 text-pink-400 text-xs"></i>
+             </div>
+         </div>
+         
+         <!-- Mobile Search Icon Trigger (Optional, kept hidden as we use bar below) -->
+      </div>
+  </div>
+</nav>
+
+<!-- Mobile Filter Bar (Removed Province) -->
+<div class="lg:hidden bg-white border-b border-pink-100 px-3 py-3 sticky top-16 z-40 shadow-sm overflow-x-auto no-scrollbar">
+    <div class="flex gap-2 w-full min-w-[320px]">
+        <select id="filter_category_mobile" class="border border-pink-200 rounded-full px-3 py-0 text-xs bg-pink-50 outline-none w-[40%] font-medium text-slate-600 h-10">
+            <option value="all">👗 หมวดหมู่</option>
+        </select>
+        <!-- Removed Province Filter -->
+        <div class="relative w-[60%]">
+            <input id="q_mobile" type="text" placeholder="ค้นหาเสื้อผ้า..." class="w-full pl-8 pr-3 py-0 bg-slate-50 border border-slate-200 rounded-full text-xs outline-none text-slate-800 placeholder-slate-400 h-10 font-medium appearance-none">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Header Hero -->
+<header class="bg-gradient-to-r from-rose-400 via-pink-500 to-purple-500 text-white relative overflow-hidden shadow-lg">
+    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+    <div class="max-w-7xl mx-auto px-4 py-8 relative z-10">
+        <div class="flex flex-col items-center text-center sm:items-start sm:text-left">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full mb-3 border border-white/20">
+                <div id="statusDot" class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                <span class="text-[10px] font-bold text-white uppercase tracking-widest"><span id="countTutors" class="text-white text-xs mr-1 font-mono">0</span> Items Online</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight mb-2 drop-shadow-sm">
+                ส่งต่อ<span class="text-yellow-300 italic">สไตล์</span>ที่ใช่ ราคาที่คุณชอบ
+            </h1>
+            <p class="text-pink-100 text-xs sm:text-sm font-light max-w-md leading-relaxed hidden sm:block">
+                แหล่งรวมเสื้อผ้าแฟชั่นมือหนึ่ง-มือสอง กระเป๋า รองเท้า อัปเดตเทรนด์ใหม่ทุกวัน
+            </p>
+        </div>
+    </div>
+</header>
+
+<main class="flex-grow max-w-7xl mx-auto px-4 py-6 w-full relative z-20">
+    <!-- Loader -->
+    <div id="loading" class="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-pink-100 shadow-sm hidden">
+        <div class="w-10 h-10 border-4 border-pink-100 border-t-pink-500 rounded-full animate-spin mb-3"></div>
+        <p class="text-pink-400 text-[10px] font-bold tracking-widest uppercase">Loading Fashion Items...</p>
+    </div>
+    
+    <!-- Grid adjusted: 4 Columns on Mobile -->
+    <section id="board" class="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 pb-8"></section>
+
+    <!-- Pagination -->
+    <div id="pagination" class="flex justify-center items-center gap-4 pb-12">
+        <button onclick="changePage(-1)" id="btnPrev" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-500 active:bg-pink-50 disabled:opacity-30 shadow-sm transition-colors hover:text-pink-500"><i class="fa-solid fa-arrow-left"></i></button>
+        <span id="pageIndicator" class="text-xs font-bold text-slate-500 font-mono">1 / 1</span>
+        <button onclick="changePage(1)" id="btnNext" class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-500 active:bg-pink-50 disabled:opacity-30 shadow-sm transition-colors hover:text-pink-500"><i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+</main>
+
+<footer class="bg-white text-slate-500 py-8 px-4 border-t border-slate-100 text-center">
+    <div class="flex justify-center gap-4 mb-4">
+        <i class="fa-brands fa-instagram text-xl hover:text-pink-600 transition-colors cursor-pointer"></i>
+        <i class="fa-brands fa-facebook text-xl hover:text-blue-600 transition-colors cursor-pointer"></i>
+        <i class="fa-brands fa-line text-xl hover:text-green-500 transition-colors cursor-pointer"></i>
+    </div>
+    <p class="text-[10px] text-slate-400">© 2024 StyleCycle Fashion Market.</p>
+</footer>
+
+<!-- View Detail Dialog -->
+<dialog id="viewDlg" class="w-full max-w-4xl p-0 rounded-2xl overflow-hidden bg-white shadow-2xl">
+    <div class="flex flex-col md:grid md:grid-cols-12 h-[85vh] md:h-[600px]">
+        <!-- Image Section -->
+        <div class="flex-none h-[45%] md:h-full md:col-span-6 bg-slate-100 relative group">
+            <div id="detailImageHero" class="w-full h-full relative">
+                <img id="viewHeroImg" src="" class="w-full h-full object-cover" loading="lazy" onerror="handleImgError(this)">
+            </div>
+            <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-2 px-4 z-10" id="viewImages"></div>
+            <button onclick="closeViewModal()" class="absolute top-3 right-3 bg-white/80 text-slate-800 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm md:hidden shadow-sm z-20"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <!-- Info Section -->
+        <div class="flex-grow md:col-span-6 flex flex-col bg-white overflow-hidden relative">
+            <div class="p-6 overflow-y-auto flex-grow">
+                <div class="flex justify-between items-start mb-2">
+                    <span id="viewCategoryBadge" class="text-[10px] font-bold text-pink-600 uppercase tracking-widest bg-pink-100 px-2 py-1 rounded-md border border-pink-200">Clothing</span>
+                    <div class="flex gap-2 hidden md:flex">
+                        <button id="btnDeletePost" class="text-slate-300 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="closeViewModal()" class="text-slate-300 hover:text-slate-800 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    </div>
+                </div>
+
+                <h2 id="viewTitle" class="text-xl font-bold text-slate-900 mb-2 leading-tight font-serif"></h2>
+                
+                <div class="flex items-end gap-2 mb-6">
+                    <span class="text-3xl font-bold text-pink-600 font-mono" id="viewPrice"></span>
+                    <span class="text-sm text-slate-400 mb-1">THB</span>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold">ร้านค้า / ผู้ขาย</p>
+                            <p id="viewContact" class="font-bold text-slate-800 text-sm truncate"></p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                         <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">พิกัด / ส่งจาก</p>
+                            <p id="viewProvince" class="text-xs text-slate-700 font-medium flex items-center gap-1"><i class="fa-solid fa-location-dot text-pink-400"></i> <span></span></p>
+                         </div>
+                         <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">เขต / อำเภอ</p>
+                            <p id="viewAddress" class="text-xs text-slate-700 font-medium truncate"></p>
+                         </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-pink-400 text-xs"></i> รายละเอียดสินค้า
+                        </h4>
+                        <div id="viewBody" class="text-sm text-slate-600 leading-relaxed whitespace-pre-line font-light"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Action -->
+            <div class="p-4 border-t border-slate-100 bg-white flex-none sticky bottom-0 backdrop-blur-xl bg-white/90">
+                <a id="btnCall" href="#" class="w-full bg-slate-900 text-white py-3.5 rounded-xl font-bold text-sm shadow-xl shadow-slate-200 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-line text-lg text-green-400"></i> ติดต่อ / สั่งซื้อสินค้า
+                </a>
+            </div>
+        </div>
+    </div>
+</dialog>
+
+<!-- Registration Dialog -->
+<dialog id="dlg" class="w-full max-w-lg p-0 rounded-2xl overflow-hidden bg-white shadow-2xl h-[95vh] sm:h-auto">
+    <div class="flex flex-col h-full">
+        <!-- Header -->
+        <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-white flex-none">
+            <h3 id="dlgTitle" class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <span class="bg-pink-100 text-pink-600 w-8 h-8 rounded-full flex items-center justify-center text-xs"><i class="fa-solid fa-bag-shopping"></i></span> ลงประกาศขายเสื้อผ้า
+            </h3>
+            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-900 w-8 h-8 rounded-full bg-slate-50"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <!-- Scrollable Form -->
+        <div class="p-5 overflow-y-auto flex-grow bg-[#fffbfc] space-y-5">
+            <div class="bg-white p-4 rounded-2xl border border-pink-100 shadow-sm space-y-4">
+                <h4 class="text-[10px] font-bold text-pink-400 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-tag"></i> ข้อมูลสินค้า</h4>
+                <div>
+                    <label class="text-xs text-slate-500 mb-1 block">ชื่อสินค้า / หัวข้อ *</label>
+                    <input id="title" type="text" class="w-full px-3 py-2.5 text-sm" placeholder="เช่น เดรสยาวสีขาว งานป้าย...">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                     <div class="relative">
+                        <label class="text-xs text-slate-500 mb-1 block">หมวดหมู่ *</label>
+                        <select id="input_category" class="w-full px-3 py-2.5 text-sm bg-white"><option value="">เลือกหมวดหมู่</option></select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-9 text-xs text-slate-300 pointer-events-none"></i>
+                    </div>
+                    <div class="relative">
+                        <label class="text-xs text-slate-500 mb-1 block">ราคา *</label>
+                        <input id="price" type="number" class="w-full pl-3 pr-8 py-2.5 text-sm" placeholder="0">
+                        <span class="absolute right-3 top-9 text-xs text-slate-400">฿</span>
+                    </div>
+                </div>
+                <div>
+                     <label class="text-xs text-slate-500 mb-1 block">รายละเอียดเพิ่มเติม</label>
+                     <textarea id="body" rows="4" class="w-full px-3 py-2 text-sm resize-none" placeholder="บอกรายละเอียด ไซส์, ตำหนิ, สภาพสินค้า..."></textarea>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-pink-100 shadow-sm space-y-4">
+                <h4 class="text-[10px] font-bold text-pink-400 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-address-card"></i> พิกัดและติดต่อ</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="relative">
+                         <label class="text-xs text-slate-500 mb-1 block">จังหวัดที่ส่ง *</label>
+                        <select id="input_province" class="w-full px-3 py-2.5 text-sm bg-white"><option value="">เลือกจังหวัด</option></select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-9 text-xs text-slate-300 pointer-events-none"></i>
+                    </div>
+                    <div>
+                         <label class="text-xs text-slate-500 mb-1 block">เขต / อำเภอ</label>
+                        <input id="address" type="text" class="w-full px-3 py-2.5 text-sm" placeholder="เช่น ลาดพร้าว">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <input id="contact_name" type="text" class="w-full px-3 py-2.5 text-sm" placeholder="ชื่อร้าน / ผู้ขาย">
+                    </div>
+                    <div>
+                        <input id="phone" type="tel" class="w-full px-3 py-2.5 text-sm" placeholder="เบอร์โทร / Line ID *">
+                    </div>
+                </div>
+            </div>
+        
+            <div class="bg-white p-4 rounded-2xl border border-pink-100 shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="text-[10px] font-bold text-pink-400 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-images"></i> รูปสินค้า (สูงสุด 3)</h4>
+                    <span id="imgCount" class="text-[9px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">0/3</span>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <div id="previewList" class="contents"></div>
+                    <label id="uploadBtn" class="aspect-square border-2 border-dashed border-pink-200 rounded-xl bg-pink-50 flex flex-col items-center justify-center text-pink-400 active:bg-pink-100 cursor-pointer hover:border-pink-400 transition-colors">
+                        <i class="fa-solid fa-camera text-lg mb-1"></i>
+                        <span class="text-[8px]">เพิ่มรูป</span>
+                        <input id="img" type="file" class="hidden" accept="image/*" multiple onchange="appendImages(this)">
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="p-4 border-t border-slate-100 bg-white flex-none flex gap-3">
+            <button onclick="closeModal()" class="px-6 py-2.5 text-slate-500 font-bold text-xs rounded-full border border-slate-200 hover:bg-slate-50">ยกเลิก</button>
+            <button onclick="savePost()" id="btnSave" class="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 text-white py-2.5 rounded-full font-bold text-sm shadow-lg shadow-pink-200 active:scale-95 transition-all">
+                <span id="btnSaveText">ยืนยันลงประกาศ</span> 
+            </button>
+        </div>
+    </div>
+</dialog>
+
+<!-- Image Slider -->
+<div id="imageSlider" class="fixed inset-0 z-[100] bg-black/95 hidden flex-col items-center justify-center backdrop-blur-sm">
+    <button onclick="closeImageSlider()" class="absolute top-4 right-4 text-white w-10 h-10 bg-white/10 rounded-full hover:bg-white/20 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+    <div class="w-full h-full flex items-center justify-center p-4">
+        <button onclick="changeSlide(-1)" class="absolute left-4 text-white w-10 h-10 bg-black/30 rounded-full flex items-center justify-center hover:bg-black/50 transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
+        <img id="sliderMainImage" src="" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl">
+        <button onclick="changeSlide(1)" class="absolute right-4 text-white w-10 h-10 bg-black/30 rounded-full flex items-center justify-center hover:bg-black/50 transition-colors"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+    <div class="absolute bottom-8 text-white text-xs bg-white/20 px-4 py-1.5 rounded-full font-mono"><span id="sliderCounter"></span></div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwYvY-XHZDxETr9Oi79xymX3yYUCO273K_3z2MQucWh4vpMbcJ5AiyiHPCeAmYr4XsP/exec"; 
+const PROVINCES = ["กรุงเทพมหานคร", "กระบี่", "กาญจนบุรี", "กาฬสินธุ์", "กำแพงเพชร", "ขอนแก่น", "จันทบุรี", "ฉะเชิงเทรา", "ชลบุรี", "ชัยนาท", "ชัยภูมิ", "ชุมพร", "เชียงราย", "เชียงใหม่", "ตรัง", "ตราด", "ตาก", "นครนายก", "นครปฐม", "นครพนม", "นครราชสีมา", "นครศรีธรรมราช", "นครสวรรค์", "นนทบุรี", "นราธิวาส", "น่าน", "บึงกาฬ", "บุรีรัมย์", "ปทุมธานี", "ประจวบคีรีขันธ์", "ปราจีนบุรี", "ปัตตานี", "พระนครศรีอยุธยา", "พะเยา", "พังงา", "พัทลุง", "พิจิตร", "พิษณุโลก", "เพชรบุรี", "เพชรบูรณ์", "แพร่", "ภูเก็ต", "มหาสารคาม", "มุกดาหาร", "แม่ฮ่องสอน", "ยโสธร", "ยะลา", "ร้อยเอ็ด", "ระนอง", "ระยอง", "ราชบุรี", "ลพบุรี", "ลำปาง", "ลำพูน", "เลย", "ศรีสะเกษ", "สกลนคร", "สงขลา", "สตูล", "สมุทรปราการ", "สมุทรสงคราม", "สมุทรสาคร", "สระแก้ว", "สระบุรี", "สิงห์บุรี", "สุโขทัย", "สุพรรณบุรี", "สุราษฎร์ธานี", "สุรินทร์", "หนองคาย", "หนองบัวลำภู", "อ่างทอง", "อำนาจเจริญ", "อุดรธานี", "อุตรดิตถ์", "อุทัยธานี", "อุบลราชธานี"].sort();
+const CATEGORIES = ["เสื้อผ้า", "กระเป๋า", "รองเท้า", "เครื่องประดับ", "ชุดเดรส", "กางเกง/กระโปรง", "เสื้อคลุม/สูท", "ชุดว่ายน้ำ", "อื่นๆ"];
+
+let posts = [], filteredPosts = [], currentPage = 1, formImages = [], sliderImages = [], sliderIndex = 0;
+const ITEMS_PER_PAGE = 15; 
+const CACHE_KEY = 'fashion_market_posts_cache_v2'; 
+
+// Mock Data for Fashion
+function getMockData() {
+    return [
+        { id: 1, title: "เดรสยาวสีขาว งานป้าย ใส่ครั้งเดียว", price: 350, province: "กรุงเทพมหานคร", category: "ชุดเดรส", contact_name: "Kookkik Shop", phone: "Line: kookkik", address: "ลาดพร้าว", body: "เดรสยาวสีขาว ไซส์ M อก 34 เอว 28 สะโพกฟรี งานสวยมาก ซื้อมา 890 ส่งต่อถูกๆ" },
+        { id: 2, title: "เสื้อยืด Oversize ลายกราฟิกเท่ๆ", price: 150, province: "นนทบุรี", category: "เสื้อผ้า", contact_name: "Street Style", phone: "089-999-8888", address: "งามวงศ์วาน", body: "ผ้านิ่ม ใส่สบาย ไม่ย้วย อก 44-46 นิ้ว ใส่ได้ทั้งชายหญิง" },
+        { id: 3, title: "กระเป๋า Lyn แท้ 100% สภาพนางฟ้า", price: 1200, province: "ปทุมธานี", category: "กระเป๋า", contact_name: "Mine Bag", phone: "090-555-4444", address: "รังสิต", body: "อุปกรณ์ครบ ถุงผ้า ป้ายราคา ไม่มีตำหนิหนัก" },
+        { id: 4, title: "กางเกงยีนส์เอวสูง ทรงกระบอก", price: 290, province: "เชียงใหม่", category: "กางเกง/กระโปรง", contact_name: "Jeans Lover", phone: "086-111-2222", address: "มช.", body: "สียีนส์ฟอกสวยมาก เอว 26 สะโพก 36 ความยาว 40 นิ้ว" },
+        { id: 5, title: "รองเท้า Nike Jordan 1 Low", price: 3500, province: "ชลบุรี", category: "รองเท้า", contact_name: "Sneaker Head", phone: "082-333-7777", address: "บางแสน", body: "ของแท้ มือสอง สภาพ 95% ไซส์ 9US พร้อมกล่อง" },
+        { id: 6, title: "เสื้อคลุม Cardigan ไหมพรม", price: 200, province: "ขอนแก่น", category: "เสื้อคลุม/สูท", contact_name: "Winter Shop", phone: "Line: winter", address: "ในเมือง", body: "ไหมพรมนิ่ม ไม่คัน สีครีมละมุน แมทช์ง่าย" }
+    ];
+}
+
+const dom = {
+    loading: document.getElementById('loading'),
+    board: document.getElementById('board'),
+    pageIndicator: document.getElementById('pageIndicator'),
+    btnPrev: document.getElementById('btnPrev'),
+    btnNext: document.getElementById('btnNext'),
+    dlg: document.getElementById('dlg'),
+    viewDlg: document.getElementById('viewDlg'),
+    btnSaveText: document.getElementById('btnSaveText'),
+    title: document.getElementById('title'),
+    price: document.getElementById('price'),
+    province: document.getElementById('input_province'),
+    category: document.getElementById('input_category'),
+    contactName: document.getElementById('contact_name'),
+    phone: document.getElementById('phone'),
+    address: document.getElementById('address'),
+    body: document.getElementById('body'),
+    imgPreview: document.getElementById('previewList'),
+    imgCount: document.getElementById('imgCount'),
+    uploadBtn: document.getElementById('uploadBtn'),
+    filterCatDesktop: document.getElementById('filter_category_desktop'),
+    filterCatMobile: document.getElementById('filter_category_mobile'),
+    qDesktop: document.getElementById('q_desktop'),
+    qMobile: document.getElementById('q_mobile'),
+    slider: document.getElementById('imageSlider'),
+    sliderImg: document.getElementById('sliderMainImage'),
+    sliderCount: document.getElementById('sliderCounter'),
+    viewHero: document.getElementById('viewHeroImg'),
+    countTutors: document.getElementById('countTutors'),
+    statusDot: document.getElementById('statusDot')
+};
+
+function handleImgError(img) { img.src = 'https://placehold.co/600x800/fdf2f8/db2777?text=No+Image'; }
+function setScrollLock(lock) { document.body.classList.toggle('no-scroll', lock); }
+
+function init() {
+    populateDropdowns();
+    loadPosts();
+    
+    // Search Listeners
+    [dom.qDesktop, dom.qMobile].forEach(el => el.addEventListener('input', debounce(applyFilters, 400)));
+    
+    // Desktop Filters
+    if(dom.filterCatDesktop) dom.filterCatDesktop.addEventListener('change', (e) => {
+        dom.filterCatMobile.value = e.target.value;
+        applyFilters();
+    });
+
+    // Mobile Filters
+    dom.filterCatMobile.addEventListener('change', (e) => {
+        if(dom.filterCatDesktop) dom.filterCatDesktop.value = e.target.value;
+        applyFilters();
+    });
+}
+
+function populateDropdowns() {
+    // Provinces (Only for Input, Removed Filters)
+    const provHtml = PROVINCES.map(p => `<option value="${p}">${p}</option>`).join('');
+    if(dom.province) dom.province.innerHTML = `<option value="">เลือกจังหวัดส่ง *</option>${provHtml}`;
+
+    // Categories
+    const catHtml = CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
+    if(dom.category) dom.category.innerHTML = `<option value="">เลือกหมวดหมู่ *</option>${catHtml}`;
+    if(dom.filterCatDesktop) dom.filterCatDesktop.innerHTML = `<option value="all">👗 หมวดหมู่ (All)</option>${catHtml}`;
+    if(dom.filterCatMobile) dom.filterCatMobile.innerHTML = `<option value="all">👗 หมวดหมู่</option>${catHtml}`;
+}
+
+async function loadPosts() {
+    // 1. Load Cache Immediately
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    if (cachedData) {
+        try {
+            posts = JSON.parse(cachedData);
+            if(dom.countTutors) dom.countTutors.textContent = posts.length;
+            if(dom.statusDot) dom.statusDot.classList.replace('bg-gray-400', 'bg-green-400');
+            applyFilters();
+        } catch(e) { console.error("Cache Error", e); }
+    } else {
+        if(dom.loading) dom.loading.classList.remove('hidden');
+    }
+
+    // 2. Fetch Fresh Data
+    try {
+        const res = await fetch(`${API_URL}?t=${Date.now()}`);
+        if (!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        const rawPosts = (Array.isArray(data) ? data : data.data || []);
+        
+        const freshPosts = rawPosts.map(p => {
+            let imgs = [];
+            try {
+                const imgData = p.images;
+                if (typeof imgData === 'string' && imgData.trim().startsWith('[')) imgs = JSON.parse(imgData);
+                else if (imgData && imgData !== "null") imgs = [imgData];
+            } catch(e) { imgs = p.images ? [p.images] : []; }
+            return { ...p, images: imgs.map(url => url.includes('id=') ? `https://lh3.googleusercontent.com/d/${url.split('id=')[1].split('&')[0]}` : url) };
+        }).reverse();
+
+        posts = freshPosts;
+        localStorage.setItem(CACHE_KEY, JSON.stringify(posts));
+        
+        if(dom.countTutors) dom.countTutors.textContent = posts.length;
+        if(dom.statusDot) {
+            dom.statusDot.classList.replace('bg-white', 'bg-green-400');
+        }
+        applyFilters();
+        if(dom.loading) dom.loading.classList.add('hidden');
+
+    } catch (e) {
+        console.warn('Fetch Failed, using fallback:', e);
+        if(dom.loading) dom.loading.classList.add('hidden');
+        if(dom.statusDot) dom.statusDot.classList.replace('bg-white', 'bg-red-500');
+        
+        if (posts.length === 0) {
+            posts = getMockData().map(p => ({...p, images: []}));
+            applyFilters();
+            Swal.fire({ toast: true, position: 'top', icon: 'info', title: 'โหมดตัวอย่าง (Offline)', timer: 3000, showConfirmButton: false });
+        }
+    }
+}
+
+function applyFilters() {
+    const q = (dom.qDesktop.value || dom.qMobile.value).toLowerCase();
+    const cat = dom.filterCatDesktop ? dom.filterCatDesktop.value : (dom.filterCatMobile ? dom.filterCatMobile.value : 'all');
+    
+    filteredPosts = posts.filter(p => {
+        const matchText = (String(p.title)+String(p.body)+String(p.province)).toLowerCase().includes(q);
+        const matchCat = cat === 'all' || (p.category && p.category === cat); 
+        return matchText && matchCat;
+    });
+    currentPage = 1;
+    renderBoard();
+}
+
+function renderBoard() {
+    dom.board.innerHTML = '';
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const items = filteredPosts.slice(start, start + ITEMS_PER_PAGE);
+    
+    if (items.length === 0) {
+        dom.board.innerHTML = `<div class="col-span-full py-20 text-center flex flex-col items-center justify-center text-pink-300">
+            <i class="fa-solid fa-shirt text-4xl mb-3 opacity-50"></i>
+            <span class="text-xs font-light tracking-wide">ไม่พบสินค้าที่คุณค้นหา</span>
+        </div>`;
+    } else {
+        items.forEach(p => {
+            const thumb = (p.images && p.images.length > 0) ? p.images[0] : 'https://placehold.co/600x800/fdf2f8/db2777?text=StyleCycle';
+            const catBadge = p.category ? `<span class="bg-pink-100 text-pink-600 text-[8px] font-bold px-1.5 py-0.5 rounded border border-pink-200">${p.category}</span>` : '';
+            const card = document.createElement('div');
+            card.className = "job-card cursor-pointer group";
+            card.onclick = () => viewDetail(p.id);
+            card.innerHTML = `
+                <div class="aspect-square bg-slate-100 relative overflow-hidden">
+                    <img src="${thumb}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" decoding="async" onerror="this.src='https://placehold.co/600x800/fdf2f8/db2777?text=StyleCycle'">
+                    <div class="absolute bottom-2 left-2 bg-black/50 backdrop-blur-md px-1 py-0.5 rounded text-[7px] font-medium text-white shadow-sm flex items-center gap-1">
+                       <i class="fa-solid fa-location-dot text-pink-400"></i> ${p.province}
+                    </div>
+                </div>
+                <div class="p-2">
+                    <div class="flex justify-between items-start mb-1 h-4">
+                        ${catBadge}
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-[10px] leading-snug line-clamp-2 h-7 mb-1 group-hover:text-pink-600 transition-colors">${p.title}</h3>
+                    <div class="flex justify-between items-end">
+                         <div class="text-[8px] text-slate-400 font-light truncate w-10">${p.contact_name || 'ร้านค้า'}</div>
+                        <div class="text-pink-600 font-bold text-xs">฿${Number(p.price).toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+            dom.board.appendChild(card);
+        });
+    }
+    updatePagination();
+}
+
+function updatePagination() {
+    const total = Math.ceil(filteredPosts.length / ITEMS_PER_PAGE) || 1;
+    dom.pageIndicator.textContent = `${currentPage} / ${total}`;
+    dom.btnPrev.disabled = currentPage === 1;
+    dom.btnNext.disabled = currentPage === total;
+}
+
+function changePage(delta) { currentPage += delta; renderBoard(); window.scrollTo({ top: 0, behavior: 'auto' }); }
+function openNewPostModal() { resetForm(); dom.dlg.showModal(); setScrollLock(true); }
+function closeModal() { dom.dlg.close(); setScrollLock(false); }
+
+function viewDetail(id) {
+    const p = posts.find(x => x.id === id);
+    if (!p) return;
+    dom.viewHero.src = (p.images && p.images.length > 0) ? p.images[0] : 'https://placehold.co/600x800/fdf2f8/db2777?text=No+Image';
+    document.getElementById('viewTitle').textContent = p.title;
+    document.getElementById('viewPrice').textContent = `${Number(p.price).toLocaleString()}`;
+    document.getElementById('viewCategoryBadge').textContent = p.category || 'สินค้าทั่วไป';
+    document.getElementById('viewContact').textContent = p.contact_name || 'ไม่ระบุชื่อร้าน';
+    document.getElementById('viewProvince').querySelector('span').textContent = p.province;
+    document.getElementById('viewAddress').textContent = p.address || '-';
+    document.getElementById('viewBody').textContent = p.body || 'ไม่มีรายละเอียดเพิ่มเติม';
+    document.getElementById('btnCall').href = p.phone ? `tel:${p.phone}` : "#";
+    
+    const imgBox = document.getElementById('viewImages');
+    imgBox.innerHTML = '';
+    sliderImages = p.images || [];
+    if (sliderImages.length === 0) sliderImages = ['https://placehold.co/600x800/fdf2f8/db2777?text=No+Image'];
+
+    sliderImages.forEach((url, i) => {
+        const img = document.createElement('div');
+        img.className = `h-10 w-10 md:w-12 md:h-12 rounded-lg border-2 cursor-pointer bg-center bg-cover ${i===0?'border-pink-500':'border-white'}`;
+        img.style.backgroundImage = `url('${url}')`;
+        img.onclick = (e) => { e.stopPropagation(); openSlider(i); };
+        imgBox.appendChild(img);
+    });
+
+    document.getElementById('btnDeletePost').onclick = (e) => { e.stopPropagation(); confirmDelete(p.id); };
+    dom.viewDlg.showModal();
+    setScrollLock(true);
+}
+
+function closeViewModal() { dom.viewDlg.close(); setScrollLock(false); }
+
+async function confirmDelete(id) {
+    closeViewModal(); 
+    const res = await Swal.fire({ title: 'ลบสินค้านี้?', text: "คุณต้องการลบรายการนี้ใช่ไหม", icon: 'warning', showCancelButton: true, confirmButtonColor: '#be185d', cancelButtonColor: '#cbd5e1', confirmButtonText: 'ลบเลย', cancelButtonText: 'ยกเลิก' });
+    if (res.isConfirmed) {
+        Swal.fire({ title: 'Deleting...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        try {
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', id: id }) });
+            posts = posts.filter(p => p.id !== id);
+            localStorage.setItem(CACHE_KEY, JSON.stringify(posts));
+            applyFilters();
+            Swal.fire({ icon: 'success', title: 'ลบสำเร็จ', timer: 1000, showConfirmButton: false });
+        } catch (e) { Swal.fire('Error', 'เกิดข้อผิดพลาด', 'error'); }
+    }
+}
+
+function appendImages(input) {
+    const files = Array.from(input.files);
+    files.slice(0, 3 - formImages.length).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => { formImages.push(e.target.result); renderPreview(); };
+        reader.readAsDataURL(file);
+    });
+}
+
+function renderPreview() {
+    dom.imgPreview.innerHTML = '';
+    formImages.forEach((src, i) => {
+        const div = document.createElement('div');
+        div.className = "relative aspect-square rounded-lg overflow-hidden border border-slate-200";
+        div.innerHTML = `<img src="${src}" class="w-full h-full object-cover"><button onclick="removeImg(${i})" class="absolute top-1 right-1 bg-white text-red-500 w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm"><i class="fa-solid fa-xmark"></i></button>`;
+        dom.imgPreview.appendChild(div);
+    });
+    dom.imgCount.textContent = `${formImages.length}/3`;
+    dom.uploadBtn.parentElement.classList.toggle('hidden', formImages.length >= 3);
+}
+
+function removeImg(i) { formImages.splice(i, 1); renderPreview(); }
+
+async function savePost() {
+    const validations = [dom.title, dom.price, dom.province, dom.category, dom.phone];
+    let ok = true;
+    validations.forEach(el => {
+        if (!el.value.trim()) { el.classList.add('field-error'); ok = false; }
+        else el.classList.remove('field-error');
+    });
+    if (!ok) return Swal.fire({ icon: 'error', title: 'ข้อมูลไม่ครบ', text: 'กรุณากรอกข้อมูลที่มีเครื่องหมาย *', timer: 1500, showConfirmButton: false });
+
+    const btn = document.getElementById('btnSave');
+    btn.disabled = true; dom.btnSaveText.textContent = "กำลังบันทึก...";
+    
+    try {
+        await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
+            action: 'add', id: Date.now(), title: dom.title.value, price: Number(dom.price.value),
+            province: dom.province.value, category: dom.category.value, 
+            address: dom.address.value, contact_name: dom.contactName.value,
+            phone: dom.phone.value, body: dom.body.value, images: formImages
+        })});
+        
+        closeModal();
+        Swal.fire({ title: 'ลงขายสำเร็จ!', icon: 'success', timer: 1500, showConfirmButton: false });
+        setTimeout(() => loadPosts(), 1000);
+    } catch (e) { Swal.fire('Error', 'เกิดข้อผิดพลาด', 'error'); } 
+    finally { btn.disabled = false; dom.btnSaveText.textContent = "ยืนยันลงประกาศ"; }
+}
+
+function openSlider(i) {
+    sliderIndex = i;
+    dom.sliderImg.src = sliderImages[i];
+    dom.sliderCount.textContent = `${i + 1} / ${sliderImages.length}`;
+    dom.slider.classList.remove('hidden'); dom.slider.classList.add('flex');
+    setScrollLock(true);
+}
+
+function closeImageSlider() { dom.slider.classList.add('hidden'); dom.slider.classList.remove('flex'); setScrollLock(false); }
+
+function changeSlide(n) {
+    sliderIndex = (sliderIndex + n + sliderImages.length) % sliderImages.length;
+    dom.sliderImg.src = sliderImages[sliderIndex];
+    dom.sliderCount.textContent = `${sliderIndex + 1} / ${sliderImages.length}`;
+}
+
+function debounce(fn, t) { let timer; return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), t); }; }
+
+function resetForm() {
+    dom.title.value = dom.price.value = dom.province.value = dom.category.value = dom.contactName.value = dom.phone.value = dom.address.value = dom.body.value = '';
+    formImages = []; renderPreview();
+    [dom.title, dom.price, dom.province, dom.category, dom.phone].forEach(el => el.classList.remove('field-error'));
+}
+
+function refreshApp() {
+    dom.qDesktop.value = dom.qMobile.value = '';
+    if(dom.filterCatDesktop) dom.filterCatDesktop.value = 'all';
+    if(dom.filterCatMobile) dom.filterCatMobile.value = 'all';
+    loadPosts();
+}
+
+init();
+</script>
+</body>
+</html>
